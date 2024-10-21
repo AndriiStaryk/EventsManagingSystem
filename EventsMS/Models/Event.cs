@@ -6,6 +6,8 @@ public class Event
     public string Name { get; set; } = null!;
     public string Description { get; set; } = null!;
     public DateTime EventDate { get; set; }
+
+    public double Duration { get; set; }
     public int LocationId { get; set; }
     //public int CreatorId { get; set; }
     public byte[]? Image { get; set; }

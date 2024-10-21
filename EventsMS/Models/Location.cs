@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EventsManagingSystem.Models;
 
@@ -17,9 +18,11 @@ public class Location
     [StringLength(100, ErrorMessage = "The name cannot be longer than 100 characters.")]
 
     public string Address { get; set; } = null!;
-    public decimal Latitude { get; set; }
-    public decimal Longitude { get; set; }
-    public DateTime CreatedAt { get; set; }
+
+   
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+    //public DateTime CreatedAt { get; set; }
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 }

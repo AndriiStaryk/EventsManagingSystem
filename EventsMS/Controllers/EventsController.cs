@@ -7,156 +7,157 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventsManagingSystem.Models;
 
-namespace EventsMS.Controllers;
-
-public class EventsController : Controller
+namespace EventsMS.Controllers
 {
-    private readonly EventsMSDBContext _context;
-
-    public EventsController(EventsMSDBContext context)
+    public class EventsController : Controller
     {
-        _context = context;
-    }
+        private readonly EventsMSDBContext _context;
 
-    // GET: Events
-    public async Task<IActionResult> Index()
-    {
-        var eventsMSDBContext = _context.Events.Include(e => e.Location);
-        return View(await eventsMSDBContext.ToListAsync());
-    }
-
-    // GET: Events/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
+        public EventsController(EventsMSDBContext context)
         {
-            return NotFound();
+            _context = context;
         }
 
-        var @event = await _context.Events
-            .Include(e => e.Location)
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (@event == null)
+        // GET: Events
+        public async Task<IActionResult> Index()
         {
-            return NotFound();
+            var eventsMSDBContext = _context.Events.Include(e => e.Location);
+            return View(await eventsMSDBContext.ToListAsync());
         }
 
-        return View(@event);
-    }
-
-    // GET: Events/Create
-    public IActionResult Create()
-    {
-        ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address");
-        return View();
-    }
-
-    // POST: Events/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Name,Description,EventDate,LocationId,Image,CreatedAt")] Event @event)
-    {
-        if (ModelState.IsValid)
+        // GET: Events/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            _context.Add(@event);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var @event = await _context.Events
+                .Include(e => e.Location)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (@event == null)
+            {
+                return NotFound();
+            }
+
+            return View(@event);
+        }
+
+        // GET: Events/Create
+        public IActionResult Create()
+        {
+            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address");
+            return View();
+        }
+
+        // POST: Events/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,EventDate,Duration,LocationId,Image,CreatedAt")] Event @event)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(@event);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address", @event.LocationId);
+            return View(@event);
+        }
+
+        // GET: Events/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var @event = await _context.Events.FindAsync(id);
+            if (@event == null)
+            {
+                return NotFound();
+            }
+            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address", @event.LocationId);
+            return View(@event);
+        }
+
+        // POST: Events/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,EventDate,Duration,LocationId,Image,CreatedAt")] Event @event)
+        {
+            if (id != @event.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(@event);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!EventExists(@event.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address", @event.LocationId);
+            return View(@event);
+        }
+
+        // GET: Events/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var @event = await _context.Events
+                .Include(e => e.Location)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (@event == null)
+            {
+                return NotFound();
+            }
+
+            return View(@event);
+        }
+
+        // POST: Events/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var @event = await _context.Events.FindAsync(id);
+            if (@event != null)
+            {
+                _context.Events.Remove(@event);
+            }
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address", @event.LocationId);
-        return View(@event);
-    }
 
-    // GET: Events/Edit/5
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null)
+        private bool EventExists(int id)
         {
-            return NotFound();
+            return _context.Events.Any(e => e.Id == id);
         }
-
-        var @event = await _context.Events.FindAsync(id);
-        if (@event == null)
-        {
-            return NotFound();
-        }
-        ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address", @event.LocationId);
-        return View(@event);
-    }
-
-    // POST: Events/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,EventDate,LocationId,Image,CreatedAt")] Event @event)
-    {
-        if (id != @event.Id)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                _context.Update(@event);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EventExists(@event.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index));
-        }
-        ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address", @event.LocationId);
-        return View(@event);
-    }
-
-    // GET: Events/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var @event = await _context.Events
-            .Include(e => e.Location)
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (@event == null)
-        {
-            return NotFound();
-        }
-
-        return View(@event);
-    }
-
-    // POST: Events/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        var @event = await _context.Events.FindAsync(id);
-        if (@event != null)
-        {
-            _context.Events.Remove(@event);
-        }
-
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
-    }
-
-    private bool EventExists(int id)
-    {
-        return _context.Events.Any(e => e.Id == id);
     }
 }
