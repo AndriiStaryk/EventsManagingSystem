@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using EventsMS.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -16,11 +17,16 @@ public class EventsMSDBContext: DbContext
 
     public virtual DbSet<CreatorEvent> CreatorsEvents { get; set; }
 
-   
+    public virtual DbSet<Review> Reviews { get; set; }
+
     public virtual DbSet<Participant> Participants { get; set; }
 
     public virtual DbSet<ParticipantEvent> ParticipantsEvents { get; set; }
 
+    public EventsMSDBContext()
+    {
+        //Database.EnsureCreated();
+    }
 
     public EventsMSDBContext(DbContextOptions<EventsMSDBContext> options) : base(options)
     {

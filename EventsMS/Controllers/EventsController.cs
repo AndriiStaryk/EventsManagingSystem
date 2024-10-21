@@ -6,16 +6,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventsManagingSystem.Models;
+using EventsMS.Models;
 
 namespace EventsMS.Controllers
 {
     public class EventsController : Controller
     {
         private readonly EventsMSDBContext _context;
+        private EventVM _eventVM;
+        private Event _event = new Event();
 
         public EventsController(EventsMSDBContext context)
         {
             _context = context;
+            _eventVM = new EventVM(context, _event);
         }
 
         // GET: Events
@@ -41,14 +45,19 @@ namespace EventsMS.Controllers
                 return NotFound();
             }
 
-            return View(@event);
+            _eventVM = new EventVM(_context, @event);
+            return View(_eventVM);
         }
 
         // GET: Events/Create
         public IActionResult Create()
         {
+            _eventVM = new EventVM(_context, _event);
             ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address");
-            return View();
+            ViewData["Creators"] = new SelectList(_context.Users, "Id", "Name");
+            ViewData["Participants"] = new SelectList(_context.Users, "Id", "Name");
+            
+            return View(_eventVM);
         }
 
         // POST: Events/Create
@@ -56,16 +65,86 @@ namespace EventsMS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,EventDate,Duration,LocationId,Image,CreatedAt")] Event @event)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,EventDate,Duration,LocationId,Image")] Event @event,
+                                                int[] creators, int[] participants, IFormFile? image)
         {
+
             if (ModelState.IsValid)
             {
-                _context.Add(@event);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (!await EventVM.IsEventExist(@event.Name,
+                                                @event.Description,
+                                                @event.EventDate,
+                                                @event.LocationId,
+                                                @event.Duration,
+                                                image,
+                                                _context))
+                {
+                    _eventVM.Event = @event;
+
+                    if (image != null && image.Length > 0)
+                    {
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await image.CopyToAsync(memoryStream);
+                            @event.Image = memoryStream.ToArray();
+                        }
+                    }
+                    else
+                    {
+                        string imagePath = "C:\\Users\\Andrii\\source\\repos\\MoviePickerWebApplication_v2\\src\\MoviePickerMVC\\MoviePickerInfrastructure\\wwwroot\\Images\\no_movie_image.jpg";
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            byte[] defaultImageBytes = System.IO.File.ReadAllBytes(imagePath);
+                            @event.Image = defaultImageBytes;
+                        }
+                    }
+
+                    _context.Add(@event);
+
+                    foreach (var creatorId in creators)
+                    {
+                        Creator c = new Creator();
+                        c.UserId = creatorId;
+                        _context.Creators.Add(c);
+                        await _context.SaveChangesAsync();
+                        _eventVM.Event.CreatorEvents.Add(new CreatorEvent { EventId = @event.Id, CreatorId = c.Id });
+                    }
+
+                    foreach (var participantId in participants)
+                    {
+                        Participant p = new Participant();
+                        p.UserId = participantId;
+                        _context.Participants.Add(p);
+                        await _context.SaveChangesAsync();
+                        _eventVM.Event.ParticipantEvents.Add(new ParticipantEvent { EventId = @event.Id, ParticipantId = p.Id });
+                    }
+
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "This event already exists.");
+                }
             }
-            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address", @event.LocationId);
-            return View(@event);
+
+            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address");
+            ViewData["Creators"] = new SelectList(_context.Creators, "Id", "UserId");
+            ViewData["Participants"] = new SelectList(_context.Participants, "Id", "UserId");
+
+            return View(_eventVM);
+
+
+
+            //if (ModelState.IsValid)
+            //{
+            //    _context.Add(@event);
+            //    await _context.SaveChangesAsync();
+            //    return RedirectToAction(nameof(Index));
+            //}
+            //ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address", @event.LocationId);
+            //return View(@event);
         }
 
         // GET: Events/Edit/5

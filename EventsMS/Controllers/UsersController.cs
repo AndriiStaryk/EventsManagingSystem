@@ -53,10 +53,29 @@ namespace EventsMS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Username,Password,Email,CreatedAt,Avatar")] User user)
+        public async Task<IActionResult> Create([Bind("Id,Name,MobileNumber,Username,Password,Email,CreatedAt,Avatar")] User user, IFormFile? image)
         {
             if (ModelState.IsValid)
             {
+
+                if (image != null && image.Length > 0)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await image.CopyToAsync(memoryStream);
+                        user.Avatar = memoryStream.ToArray();
+                    }
+                }
+                else
+                {
+                    string imagePath = "C:\\Users\\Andrii\\source\\repos\\MoviePickerWebApplication_v2\\src\\MoviePickerMVC\\MoviePickerInfrastructure\\wwwroot\\Images\\no_movie_image.jpg";
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        byte[] defaultImageBytes = System.IO.File.ReadAllBytes(imagePath);
+                        user.Avatar = defaultImageBytes;
+                    }
+                }
+
                 _context.Add(user);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -85,7 +104,7 @@ namespace EventsMS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Username,Password,Email,CreatedAt,Avatar")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,MobileNumber,Username,Password,Email,CreatedAt,Avatar")] User user)
         {
             if (id != user.Id)
             {
