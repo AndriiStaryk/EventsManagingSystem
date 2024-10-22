@@ -57,9 +57,20 @@ namespace EventsMS.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(location);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                if (!await IsLocationExist(location.Name,
+                                           location.Address,
+                                           location.Latitude,
+                                           location.Longitude))
+                {
+                    _context.Add(location);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                } 
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "This location already exists.");
+                }
             }
             return View(location);
         }
@@ -94,23 +105,33 @@ namespace EventsMS.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                if (!await IsLocationExist(location.Name,
+                                          location.Address,
+                                          location.Latitude,
+                                          location.Longitude))
                 {
-                    _context.Update(location);
-                    await _context.SaveChangesAsync();
+                    try
+                    {
+                        _context.Update(location);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!LocationExists(location.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!LocationExists(location.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError(string.Empty, "This location already exists.");
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(location);
         }
@@ -151,6 +172,22 @@ namespace EventsMS.Controllers
         private bool LocationExists(int id)
         {
             return _context.Locations.Any(e => e.Id == id);
+        }
+
+
+        public async Task<bool> IsLocationExist(string name,
+                                                string address,
+                                                double latitude,
+                                                double longitude)
+        {
+            var location = await _context.Locations
+                .FirstOrDefaultAsync(l => 
+                                       l.Name == name &&
+                                       l.Address == address &&
+                                       l.Latitude == latitude &&
+                                       l.Longitude == longitude);
+
+            return location != null;
         }
     }
 }

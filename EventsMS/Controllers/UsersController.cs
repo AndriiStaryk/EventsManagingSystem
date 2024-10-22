@@ -7,57 +7,61 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventsManagingSystem.Models;
 
-namespace EventsMS.Controllers
+namespace EventsMS.Controllers;
+
+public class UsersController : Controller
 {
-    public class UsersController : Controller
+    private readonly EventsMSDBContext _context;
+
+    public UsersController(EventsMSDBContext context)
     {
-        private readonly EventsMSDBContext _context;
+        _context = context;
+    }
 
-        public UsersController(EventsMSDBContext context)
+    // GET: Users
+    public async Task<IActionResult> Index()
+    {
+        return View(await _context.Users.ToListAsync());
+    }
+
+    // GET: Users/Details/5
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id == null)
         {
-            _context = context;
+            return NotFound();
         }
 
-        // GET: Users
-        public async Task<IActionResult> Index()
+        var user = await _context.Users
+            .FirstOrDefaultAsync(m => m.Id == id);
+        if (user == null)
         {
-            return View(await _context.Users.ToListAsync());
+            return NotFound();
         }
 
-        // GET: Users/Details/5
-        public async Task<IActionResult> Details(int? id)
+        return View(user);
+    }
+
+    // GET: Users/Create
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    // POST: Users/Create
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("Id,Name,MobileNumber,Username,Password,Email,CreatedAt,Avatar")] User user, IFormFile? image)
+    {
+        if (ModelState.IsValid)
         {
-            if (id == null)
+            if (!await IsUserExist(user.Name,
+                                   user.MobileNumber,
+                                   user.Username,
+                                   user.Email))
             {
-                return NotFound();
-            }
-
-            var user = await _context.Users
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // GET: Users/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Users/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,MobileNumber,Username,Password,Email,CreatedAt,Avatar")] User user, IFormFile? image)
-        {
-            if (ModelState.IsValid)
-            {
-
                 if (image != null && image.Length > 0)
                 {
                     using (var memoryStream = new MemoryStream())
@@ -79,39 +83,49 @@ namespace EventsMS.Controllers
                 _context.Add(user);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
+            } 
+            else
+            {
+                ModelState.AddModelError(string.Empty, "This user already exists.");
             }
-            return View(user);
+        }
+        return View(user);
+    }
+
+    // GET: Users/Edit/5
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
         }
 
-        // GET: Users/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        var user = await _context.Users.FindAsync(id);
+        if (user == null)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            return NotFound();
+        }
+        return View(user);
+    }
 
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return View(user);
+    // POST: Users/Edit/5
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,MobileNumber,Username,Password,Email,CreatedAt,Avatar")] User user)
+    {
+        if (id != user.Id)
+        {
+            return NotFound();
         }
 
-        // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,MobileNumber,Username,Password,Email,CreatedAt,Avatar")] User user)
+        if (ModelState.IsValid)
         {
-            if (id != user.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
+            if (!await IsUserExist(user.Name,
+                                   user.MobileNumber,
+                                   user.Username,
+                                   user.Email))
             {
                 try
                 {
@@ -131,45 +145,64 @@ namespace EventsMS.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
-        }
-
-        // GET: Users/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
+            else
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "This user already exists.");
             }
-
-            var user = await _context.Users
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
         }
+        return View(user);
+    }
 
-        // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+    // GET: Users/Delete/5
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user != null)
-            {
-                _context.Users.Remove(user);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return NotFound();
         }
 
-        private bool UserExists(int id)
+        var user = await _context.Users
+            .FirstOrDefaultAsync(m => m.Id == id);
+        if (user == null)
         {
-            return _context.Users.Any(e => e.Id == id);
+            return NotFound();
         }
+
+        return View(user);
+    }
+
+    // POST: Users/Delete/5
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user != null)
+        {
+            _context.Users.Remove(user);
+        }
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    private bool UserExists(int id)
+    {
+        return _context.Users.Any(e => e.Id == id);
+    }
+
+    public async Task<bool> IsUserExist(string name,
+                                        string mobileNumber,
+                                        string username,
+                                        string email)
+    {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u =>
+                                   u.Name == name &&
+                                   u.MobileNumber == mobileNumber &&
+                                   u.Username == username &&
+                                   u.Email == email);
+
+        return user != null;
     }
 }
