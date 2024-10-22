@@ -130,21 +130,10 @@ namespace EventsMS.Controllers
             }
 
             ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address");
-            ViewData["Creators"] = new SelectList(_context.Creators, "Id", "UserId");
-            ViewData["Participants"] = new SelectList(_context.Participants, "Id", "UserId");
+            ViewData["Creators"] = new SelectList(_context.Users, "Id", "Name");
+            ViewData["Participants"] = new SelectList(_context.Users, "Id", "Name");
 
             return View(_eventVM);
-
-
-
-            //if (ModelState.IsValid)
-            //{
-            //    _context.Add(@event);
-            //    await _context.SaveChangesAsync();
-            //    return RedirectToAction(nameof(Index));
-            //}
-            //ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Address", @event.LocationId);
-            //return View(@event);
         }
 
         // GET: Events/Edit/5

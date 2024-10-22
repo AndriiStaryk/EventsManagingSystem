@@ -113,7 +113,7 @@ public class EventVM
         context.SaveChanges();
     }
 
-   
+
     static public async Task<bool> IsEventExist(
                                    string? name,
                                    string? description,
@@ -124,6 +124,16 @@ public class EventVM
                                    EventsMSDBContext context)
     {
 
+
+        var @event = await context.Events
+           .FirstOrDefaultAsync(
+               m => m.Name == name &&
+               m.Description == description &&
+               m.EventDate == eventDate &&
+               m.LocationId == locationID &&
+               m.Duration == duration);
+
+
         byte[]? image = [];
         if (eventImage != null && eventImage.Length > 0)
         {
@@ -132,23 +142,18 @@ public class EventVM
                 await eventImage.CopyToAsync(memoryStream);
                 image = memoryStream.ToArray();
             }
+
+            if (@event != null && @event.Image!.SequenceEqual(image))
+            {
+                return true;
+            }
+
+            return false;
         }
-
-
-        var @event = await context.Events
-            .FirstOrDefaultAsync(
-                m => m.Name == name &&
-                m.Description == description &&
-                m.EventDate == eventDate &&
-                m.LocationId == locationID &&
-                m.Duration == duration);
-
-        if (@event != null && image != null && @event.Image!.SequenceEqual(image))
+        else
         {
-            return true;
+            return @event != null;
         }
-
-        return false;
     }
 
 
