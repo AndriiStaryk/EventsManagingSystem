@@ -52,10 +52,11 @@ namespace EventsMS.Controllers
             //}
 
             if (await LocationsController.IsLocationExist(location.Name,
-                                                               location.Address,
-                                                               location.Latitude,
-                                                               location.Longitude,
-                                                               _context))
+                                                          location.Address,
+                                                          location.Description,
+                                                          location.Latitude,
+                                                          location.Longitude,
+                                                          _context))
             {
                 return Conflict("User already exists.");
             }
@@ -99,10 +100,11 @@ namespace EventsMS.Controllers
         public async Task<ActionResult<Location>> PostLocation(Location location)
         {
             if (await LocationsController.IsLocationExist(location.Name,
-                                                               location.Address,
-                                                               location.Latitude,
-                                                               location.Longitude,
-                                                               _context))
+                                                          location.Address,
+                                                          location.Description,
+                                                          location.Latitude,
+                                                          location.Longitude,
+                                                          _context))
             {
                 return Conflict("User already exists.");
             }

@@ -4,7 +4,7 @@
 @model EventVM
 
 @{
-    Layout = null;
+    Layout = "_Layout";
 }
 
 <!DOCTYPE html>
@@ -96,7 +96,7 @@
 
                 <div class="form-group">
                     <label asp-for="Event.Image" class="control-label"> Image </label>
-                    <input type="file" name="EventImage" accept="image/*" class="form-control" />
+                    <input type="file" name="Image" accept="image/*" class="form-control" />
                     <span asp-validation-for="Event.Image" class="text-danger"></span>
                 </div>
               

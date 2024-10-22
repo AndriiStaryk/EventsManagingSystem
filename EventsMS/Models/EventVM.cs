@@ -26,31 +26,6 @@ public class EventVM
         Location = context.Locations
             .Find(@event.LocationId)!;
 
-
-        //var userCIds = context.CreatorsEvents
-        //        .Where(ce => ce.EventId == @event.Id)
-        //        .Select(ce => ce.CreatorId)
-        //        .ToList();
-
-
-        //Creators = context.Users
-        //    .Where(u => userIds.Contains(u.Id))
-        //    .ToList();
-
-
-        //var userPIds = context.ParticipantsEvents
-        //       .Where(pe => pe.EventId == @event.Id)
-        //       .Select(pe => pe.Creator.UserId)
-        //       .ToList();
-
-
-        //Creators = context.Users
-        //    .Where(u => userIds.Contains(u.Id))
-        //    .ToList();
-
-
-
-
         Creators = (from ce in context.CreatorsEvents
                     join c in context.Creators on ce.CreatorId equals c.Id
                     join u in context.Users on c.UserId equals u.Id
@@ -62,9 +37,6 @@ public class EventVM
                         join u in context.Users on p.UserId equals u.Id
                         where pe.EventId == @event.Id
                         select u).ToList();
-
-
-
 
 
         //Participants = context.ParticipantsEvents

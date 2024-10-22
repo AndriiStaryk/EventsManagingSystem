@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<EventsManagingSystem.Models.Event>
 
 @{
-    Layout = null;
+    Layout = "_Layout";
 }
 
 <!DOCTYPE html>
@@ -33,6 +33,7 @@
            @*  <th>
                 @Html.DisplayNameFor(model => model.Image)
             </th> *@
+
            @*  <th>
                 @Html.DisplayNameFor(model => model.CreatedAt)
             </th> *@
@@ -57,6 +58,12 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Duration)
             </td>
+
+            @if (item.Image != null && item.Image.Length > 0)
+            {
+                <img src="data:image;base64,@Convert.ToBase64String(item.Image)" alt="Event Image" class="image-fit-movie" />
+            }
+
             @* <td>
                 @Html.DisplayFor(modelItem => item.Image)
             </td> *@
