@@ -6,3 +6,56 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 400px;
+        }
+    </style>
+</head>
+
+    <body>
+        <div id="map"></div>
+
+        <script>
+            var map = L.map('map').setView([50.4501, 30.5234], 6);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            fetch('/Locations/GetLocations') 
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(function (location) {
+                        L.marker([location.lat, location.lng])
+                            .addTo(map)
+                            .bindPopup(location.name);
+                    });
+                })
+                .catch(error => console.log('Error fetching locations:', error));
+        </script>
+    </body>
+
+   @*  <script>
+        // Ініціалізуємо карту з центром в Києві
+        var map = L.map('map').setView([50.4501, 30.5234], 13);
+
+        // Додаємо тайли OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Додаємо маркер
+        var marker = L.marker([50.4501, 30.5234]).addTo(map)
+            .bindPopup('Це Київ!')
+            .openPopup();
+    </script> *@
+
+
+

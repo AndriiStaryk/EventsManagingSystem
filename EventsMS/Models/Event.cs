@@ -12,7 +12,7 @@ public class Event
 
     public double Duration { get; set; }
     public int LocationId { get; set; }
-    //public int CreatorId { get; set; }
+    
 
     [JsonIgnore]
     public byte[]? Image { get; set; }

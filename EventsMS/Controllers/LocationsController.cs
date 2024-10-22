@@ -24,6 +24,22 @@ namespace EventsMS.Controllers
             return View(await _context.Locations.ToListAsync());
         }
 
+
+        public JsonResult GetLocations()
+        {
+            var locations = _context.Locations
+                .Select(loc => new
+                {
+                    lat = loc.Latitude,
+                    lng = loc.Longitude,
+                    name = loc.Name
+                }).ToList();
+
+
+            return Json(locations);
+        }
+
+
         // GET: Locations/Details/5
         public async Task<IActionResult> Details(int? id)
         {
