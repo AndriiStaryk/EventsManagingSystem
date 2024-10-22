@@ -1,4 +1,7 @@
-﻿@model EventsManagingSystem.Models.Event
+﻿@* @model EventsManagingSystem.Models.Event
+ *@
+
+@model EventVM
 
 @{
     Layout = null;
@@ -17,44 +20,88 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EventDate" class="control-label"></label>
-                <input asp-for="EventDate" class="form-control" />
-                <span asp-validation-for="EventDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Duration" class="control-label"></label>
-                <input asp-for="Duration" class="form-control" />
-                <span asp-validation-for="Duration" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LocationId" class="control-label"></label>
-                <select asp-for="LocationId" class="form-control" asp-items="ViewBag.LocationId"></select>
-                <span asp-validation-for="LocationId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Image" class="control-label"></label>
-                <input asp-for="Image" class="form-control" />
-                <span asp-validation-for="Image" class="text-danger"></span>
-            </div>
-           @*  <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div> *@
+                <div class="form-group">
+                    <label asp-for="Event.Name" class="control-label"></label>
+                    <input asp-for="Event.Name" class="form-control" />
+                    <span asp-validation-for="Event.Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Event.Description" class="control-label"></label>
+                    <input asp-for="Event.Description" class="form-control" />
+                    <span asp-validation-for="Event.Description" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Event.EventDate" class="control-label"></label>
+                    <input asp-for="Event.EventDate" class="form-control" />
+                    <span asp-validation-for="Event.EventDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Event.Duration" class="control-label"></label>
+                    <input asp-for="Event.Duration" class="form-control" />
+                    <span asp-validation-for="Event.Duration" class="text-danger"></span>
+                </div>
+                @* <div class="form-group">
+                <label asp-for="Event.LocationId" class="control-label"></label>
+                <select asp-for="Event.LocationId" class="form-control" asp-items="ViewBag.LocationId"></select>
+                </div> *@
+                <div class="form-group">
+                    <label asp-for="Event.LocationId" class="control-label"> Location </label>
+                    <select asp-for="Event.LocationId" class="form-control" asp-items="ViewBag.LocationId"></select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Creators" class="control-label"> Creators </label>
+                    <select asp-for="Creators" class="form-control" asp-items="ViewBag.Creators" multiple="multiple" size="2">
+
+                        @foreach (var item in ViewData["Creators"] as SelectList)
+                        {
+                            var creatorId = Convert.ToInt32(item.Value);
+
+                            if (Model.Creators.Any(creator => creator.Id == creatorId))
+                            {
+                                <option value="@item.Value" selected>@item.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Participants" class="control-label"> Participants </label>
+                    <select asp-for="Participants" class="form-control" asp-items="ViewBag.Participants" multiple="multiple" size="2">
+
+                        @foreach (var item in ViewData["Participants"] as SelectList)
+                        {
+                            var participantId = Convert.ToInt32(item.Value);
+
+                            if (Model.Creators.Any(participant => participant.Id == participantId))
+                            {
+                                <option value="@item.Value" selected>@item.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Event.Image" class="control-label"> Image </label>
+                    <input type="file" name="EventImage" accept="image/*" class="form-control" />
+                    <span asp-validation-for="Event.Image" class="text-danger"></span>
+                </div>
+              
+                <input type="hidden" asp-for="Event.Id" />
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
