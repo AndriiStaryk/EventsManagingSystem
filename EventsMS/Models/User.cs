@@ -1,4 +1,6 @@
-﻿namespace EventsManagingSystem.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace EventsManagingSystem.Models;
 
 public class User
 {
@@ -13,8 +15,12 @@ public class User
     public string Email { get; set; } = null!;
     public DateTime? CreatedAt { get; set; }
 
+    [JsonIgnore]
     public byte[]? Avatar { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<Creator> Creators { get; set; } = new List<Creator>();
+    
+    [JsonIgnore]
     public virtual ICollection<Participant> Participants { get; set; } = new List<Participant>();
 }

@@ -58,11 +58,12 @@ namespace EventsMS.Controllers
             if (ModelState.IsValid)
             {
 
-                if (!await IsLocationExist(location.Name,
-                                           location.Address,
-                                           location.Latitude,
-                                           location.Longitude))
-                {
+                if (!await LocationsController.IsLocationExist(location.Name,
+                                                               location.Address,
+                                                               location.Latitude,
+                                                               location.Longitude,
+                                                               _context))
+                    {
                     _context.Add(location);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -105,10 +106,11 @@ namespace EventsMS.Controllers
 
             if (ModelState.IsValid)
             {
-                if (!await IsLocationExist(location.Name,
-                                          location.Address,
-                                          location.Latitude,
-                                          location.Longitude))
+                if (!await LocationsController.IsLocationExist(location.Name,
+                                                               location.Address,
+                                                               location.Latitude,
+                                                               location.Longitude,
+                                                               _context))
                 {
                     try
                     {
@@ -175,12 +177,13 @@ namespace EventsMS.Controllers
         }
 
 
-        public async Task<bool> IsLocationExist(string name,
-                                                string address,
-                                                double latitude,
-                                                double longitude)
+        public static async Task<bool> IsLocationExist(string name,
+                                                       string address,
+                                                       double latitude,
+                                                       double longitude,
+                                                       EventsMSDBContext context)
         {
-            var location = await _context.Locations
+            var location = await context.Locations
                 .FirstOrDefaultAsync(l => 
                                        l.Name == name &&
                                        l.Address == address &&

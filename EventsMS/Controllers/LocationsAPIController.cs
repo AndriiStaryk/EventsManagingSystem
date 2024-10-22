@@ -46,12 +46,33 @@ namespace EventsMS.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLocation(int id, Location location)
         {
-            if (id != location.Id)
+            //if (id != location.Id)
+            //{
+            //    return BadRequest();
+            //}
+
+            if (await LocationsController.IsLocationExist(location.Name,
+                                                               location.Address,
+                                                               location.Latitude,
+                                                               location.Longitude,
+                                                               _context))
             {
-                return BadRequest();
+                return Conflict("User already exists.");
             }
 
-            _context.Entry(location).State = EntityState.Modified;
+            var existingLocation = await _context.Locations.FindAsync(id);
+
+            if (existingLocation == null)
+            {
+                return NotFound();
+            }
+
+            existingLocation.Name = location.Name;
+            existingLocation.Address = location.Address;
+            existingLocation.Latitude = location.Latitude;
+            existingLocation.Longitude = location.Longitude;
+
+            // _context.Entry(location).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +80,7 @@ namespace EventsMS.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!LocationExists(id))
+                if (!LocationExistsById(id))
                 {
                     return NotFound();
                 }
@@ -77,6 +98,15 @@ namespace EventsMS.Controllers
         [HttpPost]
         public async Task<ActionResult<Location>> PostLocation(Location location)
         {
+            if (await LocationsController.IsLocationExist(location.Name,
+                                                               location.Address,
+                                                               location.Latitude,
+                                                               location.Longitude,
+                                                               _context))
+            {
+                return Conflict("User already exists.");
+            }
+
             _context.Locations.Add(location);
             await _context.SaveChangesAsync();
 
@@ -99,7 +129,7 @@ namespace EventsMS.Controllers
             return NoContent();
         }
 
-        private bool LocationExists(int id)
+        private bool LocationExistsById(int id)
         {
             return _context.Locations.Any(e => e.Id == id);
         }

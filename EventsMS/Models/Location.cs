@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace EventsManagingSystem.Models;
 
@@ -22,7 +23,7 @@ public class Location
    
     public double Latitude { get; set; }
     public double Longitude { get; set; }
-    //public DateTime CreatedAt { get; set; }
-
+    
+    [JsonIgnore]
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 }

@@ -46,12 +46,34 @@ namespace EventsMS.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
-            if (id != user.Id)
+            //if (id != user.Id)
+            //{
+            //    return BadRequest();
+            //}
+
+            if (await UsersController.IsUserExist(user.Name,
+                                                  user.MobileNumber,
+                                                  user.Username,
+                                                  user.Email,
+                                                  _context))
             {
-                return BadRequest();
+                return Conflict("User already exists.");
             }
 
-            _context.Entry(user).State = EntityState.Modified;
+            var existingUser = await _context.Users.FindAsync(id);
+
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+
+            existingUser.Name = user.Name;
+            existingUser.MobileNumber = user.MobileNumber;
+            existingUser.Username = user.Username;
+            existingUser.Email = user.Email;
+
+
+            // _context.Entry(user).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +81,7 @@ namespace EventsMS.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
+                if (!UserExistsById(id))
                 {
                     return NotFound();
                 }
@@ -77,6 +99,15 @@ namespace EventsMS.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
+            if (await UsersController.IsUserExist(user.Name,
+                                                  user.MobileNumber,
+                                                  user.Username,
+                                                  user.Email,
+                                                  _context))
+            {
+                return Conflict("User already exists.");
+            }
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -99,9 +130,12 @@ namespace EventsMS.Controllers
             return NoContent();
         }
 
-        private bool UserExists(int id)
+        private bool UserExistsById(int id)
         {
             return _context.Users.Any(e => e.Id == id);
         }
+
+
+
     }
 }

@@ -57,10 +57,11 @@ public class UsersController : Controller
     {
         if (ModelState.IsValid)
         {
-            if (!await IsUserExist(user.Name,
-                                   user.MobileNumber,
-                                   user.Username,
-                                   user.Email))
+            if (!await UsersController.IsUserExist(user.Name,
+                                                   user.MobileNumber,
+                                                   user.Username,
+                                                   user.Email,
+                                                   _context))
             {
                 if (image != null && image.Length > 0)
                 {
@@ -122,10 +123,11 @@ public class UsersController : Controller
 
         if (ModelState.IsValid)
         {
-            if (!await IsUserExist(user.Name,
-                                   user.MobileNumber,
-                                   user.Username,
-                                   user.Email))
+            if (!await UsersController.IsUserExist(user.Name,
+                                                   user.MobileNumber,
+                                                   user.Username,
+                                                   user.Email,
+                                                   _context))
             {
                 try
                 {
@@ -191,12 +193,13 @@ public class UsersController : Controller
         return _context.Users.Any(e => e.Id == id);
     }
 
-    public async Task<bool> IsUserExist(string name,
-                                        string mobileNumber,
-                                        string username,
-                                        string email)
+    public static async Task<bool> IsUserExist(string name,
+                                               string mobileNumber,
+                                               string username,
+                                               string email,
+                                               EventsMSDBContext context)
     {
-        var user = await _context.Users
+        var user = await context.Users
             .FirstOrDefaultAsync(u =>
                                    u.Name == name &&
                                    u.MobileNumber == mobileNumber &&
