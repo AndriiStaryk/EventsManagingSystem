@@ -22,6 +22,9 @@ public class Location
 
     public string Description { get; set; } = null!;
 
+
+
+
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     
