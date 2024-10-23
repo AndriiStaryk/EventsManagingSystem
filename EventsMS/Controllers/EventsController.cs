@@ -35,6 +35,7 @@ public class EventsController : Controller
         var eventLocations = _context.Events
             .Select(e => new
             {
+                EventName = e.Name,
                 EventDesc = e.Description,
                 EventDate = e.EventDate,
                 LocationId = e.LocationId
@@ -42,6 +43,7 @@ public class EventsController : Controller
             .ToList()
             .Select(e => new
             {
+                e.EventName,
                 e.EventDesc,
                 e.EventDate,
    

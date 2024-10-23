@@ -40,7 +40,10 @@
                 if (event.location && event.location.lat && event.location.lng) {
                     L.marker([event.location.lat, event.location.lng])
                         .addTo(map)
-                        .bindPopup(event.eventDesc);
+                        .bindPopup(`
+                            <strong>${event.eventName}</strong><br>
+                            <span>${event.eventDesc}</span>
+                        `);
                 } else {
                     console.error('Missing lat/lng for location:', event);
                 }
