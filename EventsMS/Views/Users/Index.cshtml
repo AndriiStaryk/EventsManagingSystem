@@ -5,75 +5,119 @@
 }
 
 <!DOCTYPE html>
-
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Index</title>
+    <title>Users</title>
+    <style>
+        .user-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .user-card {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: calc(33.333% - 20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .user-info h4 {
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .user-actions {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .user-actions a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .user-actions a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MobileNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Username)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Password)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Avatar)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MobileNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Username)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Password)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Avatar)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Create New User</a>
+    </p>
+
+    <div class="user-cards">
+        @foreach (var user in Model)
+        {
+            <div class="user-card">
+            
+                <div class="user-avatar">
+                    @if (user.Avatar != null)
+                    {
+                        <img src="data:image;base64,@Convert.ToBase64String(user.Avatar)" alt="User Avatar" />
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/100" alt="No Avatar" />
+                    }
+                </div>
+
+               
+                <div class="user-info">
+                    <h4>@user.Name</h4>
+                    <p><strong>Mobile:</strong> @user.MobileNumber</p>
+                    <p><strong>Email:</strong> @user.Email</p>
+                </div>
+
+               
+                <div class="user-actions">
+                    <a asp-action="Edit" asp-route-id="@user.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@user.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@user.Id">Delete</a>
+                </div>
+            </div>
+        }
+    </div>
+
 </body>
 </html>
