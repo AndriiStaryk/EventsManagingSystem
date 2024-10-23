@@ -70,6 +70,7 @@ namespace EventsMS.Controllers
 
             existingLocation.Name = location.Name;
             existingLocation.Address = location.Address;
+            existingLocation.Description = location.Description;
             existingLocation.Latitude = location.Latitude;
             existingLocation.Longitude = location.Longitude;
 

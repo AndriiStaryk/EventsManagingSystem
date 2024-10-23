@@ -54,7 +54,7 @@
 
                 <div class="form-group">
                     <label asp-for="Creators" class="control-label"> Creators </label>
-                    <select asp-for="Creators" class="form-control" asp-items="ViewBag.Creators" multiple="multiple" size="2">
+                    <select asp-for="Creators" class="form-control" multiple="multiple" size="4">
 
                         @foreach (var item in ViewData["Creators"] as SelectList)
                         {
@@ -75,7 +75,7 @@
 
                 <div class="form-group">
                     <label asp-for="Participants" class="control-label"> Participants </label>
-                    <select asp-for="Participants" class="form-control" asp-items="ViewBag.Participants" multiple="multiple" size="2">
+                    <select asp-for="Participants" class="form-control" multiple="multiple" size="4">
 
                         @foreach (var item in ViewData["Participants"] as SelectList)
                         {

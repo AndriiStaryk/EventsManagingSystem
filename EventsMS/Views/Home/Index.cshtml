@@ -37,8 +37,8 @@
 
             data.forEach(function (event) {
                 
-                if (event.location && event.location.lat && event.location.lng) {
-                    L.marker([event.location.lat, event.location.lng])
+                if (event.location && event.location.latitude && event.location.longitude) {
+                    L.marker([event.location.latitude, event.location.longitude])
                         .addTo(map)
                         .bindPopup(`
                             <strong>${event.eventName}</strong><br>

@@ -38,27 +38,10 @@ public class EventsController : Controller
                 EventName = e.Name,
                 EventDesc = e.Description,
                 EventDate = e.EventDate,
-                LocationId = e.LocationId
-            })
-            .ToList()
-            .Select(e => new
-            {
-                e.EventName,
-                e.EventDesc,
-                e.EventDate,
-   
-                Location = _context.Locations
-                    .Where(l => l.Id == e.LocationId)
-                    .Select(l => new
-                    {
-                        lat = l.Latitude,
-                        lng = l.Longitude,
-                        LocationName = l.Name
-                    })
-                    .FirstOrDefault()
+                Location = e.Location
             })
             .ToList();
-
+            
         return Json(eventLocations);
     }
 
@@ -145,6 +128,8 @@ public class EventsController : Controller
                     _eventVM.Event.CreatorEvents.Add(new CreatorEvent { EventId = @event.Id, CreatorId = c.Id });
                 }
 
+                
+
                 foreach (var participantId in participants)
                 {
                     Participant p = new Participant();
@@ -220,26 +205,95 @@ public class EventsController : Controller
             {
                 try
                 {
-                    EventVM.DeleteEventRelations(@event, _context);
+                    //EventVM.DeleteEventRelations(@event, _context);
                     _eventVM.Event = @event;
 
                     foreach (var creatorId in creators)
                     {
-                        Creator c = new Creator();
-                        c.UserId = creatorId;
-                        _context.Creators.Add(c);
-                        await _context.SaveChangesAsync();
-                        _eventVM.Event.CreatorEvents.Add(new CreatorEvent { EventId = @event.Id, CreatorId = c.Id });
+
+                        var existingCreatorsIDs = _context.CreatorsEvents
+                            .Where(ce => ce.EventId == @event.Id) // Filter for the specific event
+                            .Select(ce => ce.CreatorId) // Select the CreatorId
+                            .ToList(); // Convert the result to a list
+
+
+                        if (existingCreatorsIDs.Count() > 0)
+                        {
+
+                            foreach (var crId in existingCreatorsIDs)
+                            {
+                                var cr = _context.Creators.Find(crId);
+
+                                if (cr != null)
+                                {
+                                    cr.UserId = creatorId;
+                                    _context.Update(cr);
+                                    await _context.SaveChangesAsync();
+
+                                }
+                                else
+                                {
+                                    Creator c = new Creator();
+                                    c.UserId = creatorId;
+                                    _context.Creators.Add(c);
+                                    await _context.SaveChangesAsync();
+                                    _eventVM.Event.CreatorEvents.Add(new CreatorEvent { EventId = @event.Id, CreatorId = c.Id });
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Creator c = new Creator();
+                            c.UserId = creatorId;
+                            _context.Creators.Add(c);
+                            await _context.SaveChangesAsync();
+                            _eventVM.Event.CreatorEvents.Add(new CreatorEvent { EventId = @event.Id, CreatorId = c.Id });
+                        }
                     }
+
 
                     foreach (var participantId in participants)
                     {
-                        Participant p = new Participant();
-                        p.UserId = participantId;
-                        _context.Participants.Add(p);
-                        await _context.SaveChangesAsync();
-                        _eventVM.Event.ParticipantEvents.Add(new ParticipantEvent { EventId = @event.Id, ParticipantId = p.Id });
+
+                        var existingParticipantsIDs = _context.ParticipantsEvents
+                            .Where(pe => pe.EventId == @event.Id) 
+                            .Select(pe => pe.ParticipantId) 
+                            .ToList(); 
+
+                        if (existingParticipantsIDs.Count() > 0)
+                        {
+
+                            foreach (var prId in existingParticipantsIDs)
+                            {
+                                var pr = _context.Participants.Find(prId);
+
+                                if (pr != null)
+                                {
+                                    pr.UserId = participantId;
+                                    _context.Update(pr);
+                                    await _context.SaveChangesAsync();
+
+                                }
+                                else
+                                {
+                                    Participant p = new Participant();
+                                    p.UserId = participantId;
+                                    _context.Participants.Add(p);
+                                    await _context.SaveChangesAsync();
+                                    _eventVM.Event.ParticipantEvents.Add(new ParticipantEvent { EventId = @event.Id, ParticipantId = p.Id });
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Participant p = new Participant();
+                            p.UserId = participantId;
+                            _context.Participants.Add(p);
+                            await _context.SaveChangesAsync();
+                            _eventVM.Event.ParticipantEvents.Add(new ParticipantEvent { EventId = @event.Id, ParticipantId = p.Id });
+                        }
                     }
+
 
                     var existingEvent = await _context.Events.FindAsync(id);
 

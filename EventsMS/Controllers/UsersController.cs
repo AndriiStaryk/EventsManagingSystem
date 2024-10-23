@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventsManagingSystem.Models;
+using System.Drawing;
 
 namespace EventsMS.Controllers;
 
@@ -53,7 +54,7 @@ public class UsersController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Name,MobileNumber,Username,Password,Email,CreatedAt,Avatar")] User user, IFormFile? image)
+    public async Task<IActionResult> Create([Bind("Id,Name,MobileNumber,Username,Password,Email,CreatedAt,Avatar")] User user, IFormFile? avatar)
     {
         if (ModelState.IsValid)
         {
@@ -61,13 +62,14 @@ public class UsersController : Controller
                                                    user.MobileNumber,
                                                    user.Username,
                                                    user.Email,
-                                                   _context))
+                                                   _context,
+                                                   avatar))
             {
-                if (image != null && image.Length > 0)
+                if (avatar != null && avatar.Length > 0)
                 {
                     using (var memoryStream = new MemoryStream())
                     {
-                        await image.CopyToAsync(memoryStream);
+                        await avatar.CopyToAsync(memoryStream);
                         user.Avatar = memoryStream.ToArray();
                     }
                 }
@@ -114,7 +116,7 @@ public class UsersController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,MobileNumber,Username,Password,Email,CreatedAt,Avatar")] User user)
+    public async Task<IActionResult> Edit(int id, [Bind("Name,MobileNumber,Username,Password,Email,CreatedAt,Avatar,Id")] User user, IFormFile? avatar)
     {
         if (id != user.Id)
         {
@@ -127,10 +129,35 @@ public class UsersController : Controller
                                                    user.MobileNumber,
                                                    user.Username,
                                                    user.Email,
-                                                   _context))
+                                                   _context,
+                                                   avatar))
             {
                 try
                 {
+
+
+                    var existingUser = await _context.Users.FindAsync(id);
+
+                    if (existingUser == null)
+                    {
+                        return NotFound();
+                    }
+
+                    _context.Entry(existingUser).State = EntityState.Detached;
+
+                    if (avatar != null && avatar.Length > 0)
+                    {
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await avatar.CopyToAsync(memoryStream);
+                            user.Avatar = memoryStream.ToArray();
+                        }
+                    }
+                    else
+                    {
+                        user.Avatar = existingUser.Avatar;
+                    }
+
                     _context.Update(user);
                     await _context.SaveChangesAsync();
                 }
@@ -197,7 +224,8 @@ public class UsersController : Controller
                                                string mobileNumber,
                                                string username,
                                                string email,
-                                               EventsMSDBContext context)
+                                               EventsMSDBContext context,
+                                               IFormFile? avatar = null)
     {
         var user = await context.Users
             .FirstOrDefaultAsync(u =>
@@ -206,6 +234,32 @@ public class UsersController : Controller
                                    u.Username == username &&
                                    u.Email == email);
 
-        return user != null;
+
+        byte[]? image = [];
+        if (avatar != null && avatar.Length > 0)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                await avatar.CopyToAsync(memoryStream);
+                image = memoryStream.ToArray();
+            }
+
+            if (user != null && user.Avatar!.SequenceEqual(image))
+            {
+                return true;
+            }
+
+            return false;
+        }
+        else
+        {
+            return user != null;
+        }
     }
+
+
+
+    
+
+
 }
