@@ -81,7 +81,7 @@
                         {
                             var participantId = Convert.ToInt32(item.Value);
 
-                            if (Model.Creators.Any(participant => participant.Id == participantId))
+                            if (Model.Participants.Any(participant => participant.Id == participantId))
                             {
                                 <option value="@item.Value" selected>@item.Text</option>
                             }

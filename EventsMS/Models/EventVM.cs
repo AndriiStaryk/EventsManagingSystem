@@ -1,4 +1,5 @@
 ﻿using EventsManagingSystem.Models;
+using EventsMS.Controllers;
 using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
@@ -55,6 +56,9 @@ public class EventVM
         var ces = context.CreatorsEvents
             .Where(ce => ce.EventId == @event.Id).ToList();
 
+        var cIds = ces.Select(ce => ce.CreatorId).ToList();
+
+
         foreach (var ce in ces)
         {
             if (ce != null)
@@ -63,15 +67,35 @@ public class EventVM
             }
         }
 
+        foreach(var cId in cIds)
+        {
+            var c = context.Creators.Find(cId);
+            if (c != null)
+            {
+                context.Creators.Remove(c);
+            }
+        }
+
 
         var pes = context.ParticipantsEvents
             .Where(pe => pe.EventId == @event.Id).ToList();
+
+        var pIds = pes.Select(pe => pe.ParticipantId).ToList();
 
         foreach (var pe in pes)
         {
             if (pe != null)
             {
                 context.ParticipantsEvents.Remove(pe);
+            }
+        }
+
+        foreach (var pId in pIds)
+        {
+            var p = context.Participants.Find(pId);
+            if (p != null)
+            {
+                context.Participants.Remove(p);
             }
         }
 
