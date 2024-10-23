@@ -114,9 +114,6 @@ public class EventVM
                                    int[] creators = null,
                                    int[] participants = null)
     {
-
-
-       
         var @event = await context.Events
            .FirstOrDefaultAsync(
                m => m.Name == name &&
@@ -129,6 +126,7 @@ public class EventVM
         {
             return false;
         }
+
         var cIds = (from ce in context.CreatorsEvents
                     join c in context.Creators on ce.CreatorId equals c.Id
                     join u in context.Users on c.UserId equals u.Id
@@ -136,16 +134,16 @@ public class EventVM
                     select u.Id).ToList();
 
         var pIds = (from pe in context.ParticipantsEvents
-                        join p in context.Participants on pe.ParticipantId equals p.Id
-                        join u in context.Users on p.UserId equals u.Id
-                        where pe.EventId == @event.Id
-                        select u.Id).ToList();
+                    join p in context.Participants on pe.ParticipantId equals p.Id
+                    join u in context.Users on p.UserId equals u.Id
+                    where pe.EventId == @event.Id
+                    select u.Id).ToList();
 
 
         bool isImageProvided = true;
 
         byte[]? image = [];
-        if (eventImage != null && eventImage.Length > 0 && @event != null)
+        if (eventImage != null && eventImage.Length > 0)
         {
             using (var memoryStream = new MemoryStream())
             {
@@ -153,20 +151,14 @@ public class EventVM
                 image = memoryStream.ToArray();
             }
 
-
             isImageProvided = @event.Image!.SequenceEqual(image);
-                 
         }
-        
-            return @event != null &&
-                   creators != null &&
-                   participants != null &&
-                   isImageProvided &&
-                   cIds.OrderBy(x => x).SequenceEqual(creators.OrderBy(x => x)) &&
-                   pIds.OrderBy(x => x).SequenceEqual(participants.OrderBy(x => x));
 
-        
+        return @event != null &&
+               creators != null &&
+               participants != null &&
+               isImageProvided &&
+               cIds.OrderBy(x => x).SequenceEqual(creators.OrderBy(x => x)) &&
+               pIds.OrderBy(x => x).SequenceEqual(participants.OrderBy(x => x));
     }
-
-
 }
