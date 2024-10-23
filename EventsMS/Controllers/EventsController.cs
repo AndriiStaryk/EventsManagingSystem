@@ -95,7 +95,9 @@ public class EventsController : Controller
                                             @event.LocationId,
                                             @event.Duration,
                                             image,
-                                            _context))
+                                            _context,
+                                            creators,
+                                            participants))
             {
                 _eventVM.Event = @event;
 
@@ -201,7 +203,9 @@ public class EventsController : Controller
                                             @event.LocationId,
                                             @event.Duration,
                                             image,
-                                            _context))
+                                            _context,
+                                            creators,
+                                            participants))
             {
                 try
                 {

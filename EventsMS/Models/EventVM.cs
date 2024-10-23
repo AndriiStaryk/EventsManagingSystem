@@ -2,6 +2,7 @@
 using EventsMS.Controllers;
 using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Packaging.Signing;
 using System.IO;
 
 namespace EventsMS.Models;
@@ -38,14 +39,6 @@ public class EventVM
                         join u in context.Users on p.UserId equals u.Id
                         where pe.EventId == @event.Id
                         select u).ToList();
-
-
-        //Participants = context.ParticipantsEvents
-        //   .Where(pe => pe.EventId == @event.Id)
-        //   .Select(pe => pe.Participant).ToList()!;
-
-
-
 
         AllLocations = context.Locations.ToList()!;
     }
@@ -117,10 +110,13 @@ public class EventVM
                                    int locationID,
                                    double duration,
                                    IFormFile? eventImage,
-                                   EventsMSDBContext context)
+                                   EventsMSDBContext context,
+                                   int[] creators = null,
+                                   int[] participants = null)
     {
 
 
+       
         var @event = await context.Events
            .FirstOrDefaultAsync(
                m => m.Name == name &&
@@ -128,6 +124,19 @@ public class EventVM
                m.EventDate == eventDate &&
                m.LocationId == locationID &&
                m.Duration == duration);
+
+        var cIds = (from ce in context.CreatorsEvents
+                    join c in context.Creators on ce.CreatorId equals c.Id
+                    join u in context.Users on c.UserId equals u.Id
+                    where ce.EventId == @event.Id
+                    select u.Id).ToList();
+
+        var pIds = (from pe in context.ParticipantsEvents
+                    join p in context.Participants on pe.ParticipantId equals p.Id
+                    join u in context.Users on p.UserId equals u.Id
+                    where pe.EventId == @event.Id
+                    select u.Id).ToList();
+
 
 
         byte[]? image = [];
@@ -139,16 +148,18 @@ public class EventVM
                 image = memoryStream.ToArray();
             }
 
-            if (@event != null && @event.Image!.SequenceEqual(image))
-            {
-                return true;
-            }
+            return @event != null &&
+                 @event.Image!.SequenceEqual(image) &&
+                 cIds.OrderBy(x => x).SequenceEqual(creators.OrderBy(x => x)) &&
+                 pIds.OrderBy(x => x).SequenceEqual(participants.OrderBy(x => x));
 
-            return false;
         }
         else
         {
-            return @event != null;
+            return @event != null &&
+             cIds.OrderBy(x => x).SequenceEqual(creators.OrderBy(x => x)) &&
+             pIds.OrderBy(x => x).SequenceEqual(participants.OrderBy(x => x));
+
         }
     }
 
