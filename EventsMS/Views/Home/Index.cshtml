@@ -6,70 +6,133 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <style>
-        #map {
-            height: 400px;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
+
+        #filter {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+
+            #filter label {
+                display: inline-block;
+                font-size: 14px;
+                color: #333;
+                cursor: pointer;
+            }
+
+            #filter input[type="checkbox"] {
+                margin-right: 5px;
+                accent-color: #4CAF50; /* Use the browser's default checkbox, but add a custom color */
+            }
+
+        #map {
+            width: 100%;
+            height: 500px;
+            margin-top: 10px;
+        }
+
+
     </style>
 </head>
 
-    <body>
-        <div id="map"></div>
+<body>
+    <div id="filter">
+        <label><input type="checkbox" class="event-filter" value="ended" checked> Ended Events</label>
+        <label><input type="checkbox" class="event-filter" value="now" checked> Now</label>
+        <label><input type="checkbox" class="event-filter" value="future" checked> Future</label>
+        <label><input type="checkbox" class="event-filter" value="all" checked> All</label>
+    </div>
 
-        <script>
-           
-        </script>
-    </body>
-@* <script src="~/js/site.js"></script> *@
-
-<script>
-   
-    var map = L.map('map').setView([50.4501, 30.5234], 6);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    fetch('/Events/GetLocations')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Data fetched from server:', data);
-
-            data.forEach(function (event) {
-                
-                if (event.location && event.location.latitude && event.location.longitude) {
-                    L.marker([event.location.latitude, event.location.longitude])
-                        .addTo(map)
-                        .bindPopup(`
-                            <strong>${event.eventName}</strong><br>
-                            <span>${event.eventDesc}</span>
-                        `);
-                } else {
-                    console.error('Missing lat/lng for location:', event);
-                }
-            });
-        })
-        .catch(error => console.error('Error fetching locations:', error));
+    <div id="map"></div>
 
 
-        </script>
 
 
-   @*  <script>
-        // Ініціалізуємо карту з центром в Києві
-        var map = L.map('map').setView([50.4501, 30.5234], 13);
 
-        // Додаємо тайли OpenStreetMap
+    <script>
+        var map = L.map('map').setView([50.4501, 30.5234], 6);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Додаємо маркер
-        var marker = L.marker([50.4501, 30.5234]).addTo(map)
-            .bindPopup('Це Київ!')
-            .openPopup();
-    </script> *@
+        function filterEvents(events) {
+            
+            var selectedFilters = Array.from(document.querySelectorAll('.event-filter:checked'))
+                .map(input => input.value);
 
+            
+            return events.filter(event => {
+                const eventDate = new Date(event.date); 
+                const eventDurationMs = event.duration * 60 * 60 * 1000; 
+                const eventEndDate = new Date(eventDate.getTime() + eventDurationMs); 
+                const now = new Date(); 
 
+                if (selectedFilters.includes('ended') && eventEndDate < now) {
+                    return true; 
+                }
+                if (selectedFilters.includes('now') && eventDate <= now && eventEndDate >= now) {
+                    return true; 
+                }
+                if (selectedFilters.includes('future') && eventDate > now) {
+                    return true; 
+                }
+                if (selectedFilters.includes('all')) {
+                    return true; s
+                }
+                return false; 
+            });
+        }
+
+        fetch('/Events/GetLocations')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Data fetched from server:', data);
+
+                let eventsToDisplay = data; 
+                displayMarkers(eventsToDisplay);
+
+                document.querySelectorAll('.event-filter').forEach(filter => {
+                    filter.addEventListener('change', () => {
+                        const filteredEvents = filterEvents(data);
+                        displayMarkers(filteredEvents);
+                    });
+                });
+            })
+            .catch(error => console.error('Error fetching locations:', error));
+
+        function displayMarkers(events) {
+            
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            events.forEach(function (event) {
+                if (event.location && event.location.latitude && event.location.longitude) {
+                    L.marker([event.location.latitude, event.location.longitude])
+                        .addTo(map)
+                        .bindPopup(`
+                                    <strong>${event.name}</strong>
+                                    <br>
+                                    <a href="${event.location.description}">${event.description}</a>
+                                    <br>
+                                    <span>${event.date}</span>
+                                `);
+                } else {
+                    console.error('Missing lat/lng for location:', event);
+                }
+            });
+        }
+    </script>
+</body>
 

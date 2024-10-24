@@ -35,9 +35,10 @@ public class EventsController : Controller
         var eventLocations = _context.Events
             .Select(e => new
             {
-                EventName = e.Name,
-                EventDesc = e.Description,
-                EventDate = e.EventDate,
+                Name = e.Name,
+                Description = e.Description,
+                Date = e.EventDate,
+                Duration = e.Duration,
                 Location = e.Location
             })
             .ToList();

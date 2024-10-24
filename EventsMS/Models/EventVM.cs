@@ -59,7 +59,6 @@ public class EventVM
                                 where sameCreatorIds.Contains(ce.CreatorId) && e.Id != @event.Id
                                 select e).Distinct().ToList();
 
-        //AllLocations = context.Locations.ToList()!;
     }
 
 
