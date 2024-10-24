@@ -17,38 +17,38 @@
         }
 
         .image-container {
-            width: 300px; /* Fixed width */
-            height: 400px; /* Fixed height */
-            overflow: hidden; /* Hide overflow to crop images */
-            position: relative; /* Needed for positioning the image */
-            border-radius: 10px; /* Optional: Add rounded corners */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for depth */
-            margin-right: 20px; /* Space between image and info */
+            width: 300px;
+            height: 400px;
+            overflow: hidden;
+            position: relative;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
         }
 
-        .image-container img {
-            width: 100%; /* Make image fill the container width */
-            height: 100%; /* Make image fill the container height */
-            object-fit: cover; /* Crop image while maintaining aspect ratio */
-            position: absolute; /* Positioning the image */
-            top: 50%; /* Center vertically */
-            left: 50%; /* Center horizontally */
-            transform: translate(-50%, -50%); /* Adjust position */
-        }
+            .image-container img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
 
         .info-container {
-            flex: 1; /* Take remaining space */
+            flex: 1;
             padding: 20px;
             background-color: #f9f9f9;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Space between items in info section */
+            justify-content: space-between;
         }
 
         .info-section {
-            flex: 1; /* Allow the info section to grow */
+            flex: 1;
         }
 
         .info-container h4 {
@@ -61,46 +61,112 @@
         }
 
         .map-container {
-            height: 200px; /* Fixed height for the map */
+            height: 200px;
             border-radius: 10px;
-            overflow: hidden; /* Hide overflow to crop map */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for depth */
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .creators, .participants {
+            margin-top: 20px;
+        }
+
+        .creators h5, .participants h5 {
+            font-size: 1.6rem; /* Increase header size */
+            color: black; 
         }
 
         .creators-list, .participants-list {
             display: flex;
-            gap: 10px; /* Space between avatars */
+            gap: 15px; /* Space between avatars */
             margin-top: 10px;
         }
 
         .person {
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center items horizontally */
-            cursor: pointer; /* Indicate clickable */
+            align-items: center;
+            cursor: pointer;
         }
 
         .avatar {
-            width: 50px; /* Set width for circular avatar */
-            height: 50px; /* Set height for circular avatar */
-            border-radius: 50%; /* Make the avatar circular */
-            object-fit: cover; /* Maintain aspect ratio */
-            border: 2px solid #007bff; /* Optional: Add border color */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for depth */
+            width: 70px; /* Increased width */
+            height: 70px; /* Increased height */
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #6a0dad; /* Deep purple border */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .person p {
-            margin-top: 5px; /* Space between avatar and name */
-            font-size: 0.9rem; /* Adjust font size for names */
-            text-align: center; /* Center the name text */
+            margin-top: 10px;
+            font-size: 1.1rem; /* Increased font size for names */
+            text-align: center;
+            color: black 
         }
 
+        
+        .events-list {
+            display: flex;
+            gap: 20px; /* Space between cards */
+            justify-content: flex-start; /* Align cards to the left */
+            flex-wrap: wrap; /* Allow wrapping when needed to prevent scrolling */
+        }
+
+        .event-card {
+            width: 300px; /* Set a width for landscape cards */
+            height: 150px; /* Adjust height for a horizontal card */
+            cursor: pointer;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            flex-direction: row;
+            gap: 10px; /* Space between image and text */
+        }
+
+            .event-card:hover {
+                transform: scale(1.05);
+            }
+
+        .event-image-container {
+            width: 40%; /* Set width for image in the horizontal card */
+            height: 100%; /* Keep height consistent with card */
+            overflow: hidden;
+            border-radius: 6px;
+        }
+
+        .event-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .event-info {
+            width: 60%; /* Use remaining space for the text */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+            .event-info p {
+                margin: 5px 0;
+                font-size: 1rem;
+                color: #333;
+                text-align: left;
+            }
+
     </style>
+
+
 </head>
 <body>
 
     <div class="details-container">
-        
         <div class="image-container">
             @if (Model?.Event.Image != null)
             {
@@ -112,7 +178,6 @@
             }
         </div>
 
-       
         <div class="info-container">
             <div class="info-section">
                 <h4>@Html.DisplayFor(model => model.Event.Name)</h4>
@@ -122,11 +187,9 @@
                 <p><strong>Location:</strong> @Model.Location.Address</p>
             </div>
 
-          
             <div id="map" class="map-container"></div>
         </div>
     </div>
-
 
     <div class="creators">
         <h5>Creators:</h5>
@@ -153,13 +216,41 @@
             }
         </div>
     </div>
-    
+
+
+    <div class="same-creator-events">
+        <h5>More Events from the Same Creators:</h5>
+        <div class="events-list">
+            @foreach (var eventItem in Model.EventsBySameCreators)
+            {
+                <div class="event-card" onclick="redirectToEventDetail('@eventItem.Id')">
+                    <div class="event-image-container">
+                        @if (eventItem.Image != null)
+                        {
+                            <img src="data:image;base64,@Convert.ToBase64String(eventItem.Image)" alt="Event Image" class="event-image" />
+                        }
+                        else
+                        {
+                            <p>No image available</p>
+                        }
+                    </div>
+                    <div class="event-info">
+                        <p><strong>@eventItem.Name</strong></p>
+                        <p><strong>@eventItem.Description</strong></p>
+                        <p>Date: @eventItem.EventDate.ToString("dd MMMM HH:mm")</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+
+
 
     <div class="mt-3">
         <a asp-action="Index" class="btn btn-secondary">Back to List</a>
     </div>
 
-    
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
@@ -167,7 +258,6 @@
         var latitude = @Model.Location.Latitude;
         var longitude = @Model.Location.Longitude;
 
-       
         var map = L.map('map').setView([latitude, longitude], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -175,14 +265,16 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        
         L.marker([latitude, longitude]).addTo(map)
             .bindPopup('<b>@Html.DisplayFor(model => model.Event.Name)</b><br>@Model.Location.Address')
             .openPopup();
 
-
         function redirectToUserDetail(userId) {
             window.location.href = `/Users/Details/${userId}`;
+        }
+
+        function redirectToEventDetail(eventId) {
+            window.location.href = `/Events/Details/${eventId}`;
         }
 
     </script>

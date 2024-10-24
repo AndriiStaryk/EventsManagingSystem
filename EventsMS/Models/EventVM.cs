@@ -18,7 +18,13 @@ public class EventVM
 
     public Location Location { get; set; } = null!;
 
-    public List<Location> AllLocations { get; set; }
+
+    public List<Event> EventsBySameCreators { get; set; } = new List<Event> { };
+
+    public List<Event> EventsNearby { get; set; } = new List<Event> { };
+
+
+    //public List<Location> AllLocations { get; set; }
 
     public EventVM(EventsMSDBContext context, Event @event)
     {
@@ -40,7 +46,20 @@ public class EventVM
                         where pe.EventId == @event.Id
                         select u).ToList();
 
-        AllLocations = context.Locations.ToList()!;
+        var sameCreatorIds = (from c in _context.Creators
+                             where (from ce in _context.CreatorsEvents
+                                    join creator in _context.Creators on ce.CreatorId equals creator.Id
+                                    where ce.EventId == @event.Id
+                                    select creator.UserId).Contains(c.UserId)
+                             select c.Id).ToList();
+
+
+        EventsBySameCreators = (from e in _context.Events
+                                join ce in _context.CreatorsEvents on e.Id equals ce.EventId
+                                where sameCreatorIds.Contains(ce.CreatorId) && e.Id != @event.Id
+                                select e).Distinct().ToList();
+
+        //AllLocations = context.Locations.ToList()!;
     }
 
 
@@ -160,5 +179,7 @@ public class EventVM
                isImageProvided &&
                cIds.OrderBy(x => x).SequenceEqual(creators.OrderBy(x => x)) &&
                pIds.OrderBy(x => x).SequenceEqual(participants.OrderBy(x => x));
+
+        //TODO: maybe add that creators & participants should not have same users to the check
     }
 }
