@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace EventsManagingSystem.Models;
 
@@ -8,6 +9,8 @@ public class User
 
     public string Name { get; set; } = null!;
 
+    [RegularExpression(@"^\+?(\d{1,3})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$",
+       ErrorMessage = "Please enter a valid mobile number.")]
     public string MobileNumber { get; set; } = null!;
 
     public string Username { get; set; } = null!;

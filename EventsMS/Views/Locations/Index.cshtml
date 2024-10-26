@@ -4,64 +4,122 @@
     Layout = "_Layout";
 }
 
-<!DOCTYPE html>
 
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Index</title>
+    <title>Locations</title>
+    <style>
+        .location-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .location-card {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: calc(33.333% - 20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .location-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            }
+
+        .location-marker {
+            font-size: 40px;
+            color: #6a0dad; /* Purple color */
+            margin-bottom: 15px;
+        }
+
+        .location-info {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+            .location-info h4 {
+                margin-bottom: 5px;
+            }
+
+            .location-info p {
+                margin: 5px 0;
+                font-size: 0.9rem;
+                color: #666;
+            }
+
+        .location-actions {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+            .location-actions a {
+                text-decoration: none;
+                color: #007bff;
+                font-weight: bold;
+            }
+
+                .location-actions a:hover {
+                    text-decoration: underline;
+                }
+
+        .create-new-container {
+            text-align: right;
+            margin: 20px;
+        }
+
+        .create-new {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #6a0dad; /* Purple color */
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+            .create-new:hover {
+                background-color: #5a0ca8; /* Darker purple for hover effect */
+            }
+    </style>
 </head>
 <body>
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Address)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Latitude)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Longitude)
-            </th>
-            @* <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th> *@
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Address)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Latitude)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Longitude)
-            </td>
-           @*  <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td> *@
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+    <div class="create-new-container">
+        <a asp-action="Create" class="create-new">Create New Location</a>
+    </div>
+
+    <div class="location-cards">
+        @foreach (var location in Model)
+        {
+            <div class="location-card">
+                <div class="location-marker">📍</div>
+
+                <div class="location-info">
+                    <h4>@location.Name</h4>
+                    <p><strong>Address:</strong> @location.Address</p>
+                    <p>@location.Description</p>
+                </div>
+
+                <div class="location-actions">
+                    <a asp-action="Edit" asp-route-id="@location.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@location.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@location.Id">Delete</a>
+                </div>
+            </div>
+        }
+    </div>
+
 </body>
 </html>
