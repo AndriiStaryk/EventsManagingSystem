@@ -16,6 +16,8 @@ public class EventVM
 
     public List<User> Participants { get; set; } = new List<User>();
 
+    public List<Review> Reviews { get; set; } = new List<Review>();
+
     public Location Location { get; set; } = null!;
 
 
@@ -45,6 +47,8 @@ public class EventVM
                         join u in context.Users on p.UserId equals u.Id
                         where pe.EventId == @event.Id
                         select u).ToList();
+
+        Reviews = context.Reviews.Where(r => r.EventId == @event.Id).ToList();
 
         var sameCreatorIds = (from c in _context.Creators
                              where (from ce in _context.CreatorsEvents

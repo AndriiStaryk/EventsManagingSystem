@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventsManagingSystem.Models;
 using EventsMS.Models;
+using Microsoft.Extensions.Logging;
 
 namespace EventsMS.Controllers;
 
@@ -45,8 +46,6 @@ public class EventsController : Controller
             
         return Json(eventLocations);
     }
-
-    
 
     // GET: Events/Details/5
     public async Task<IActionResult> Details(int? id)
@@ -321,5 +320,37 @@ public class EventsController : Controller
     private bool EventExists(int id)
     {
         return _context.Events.Any(e => e.Id == id);
+    }
+
+
+    [HttpPost]
+    public IActionResult CreateReview(int eventId, string title, int rating, string description)
+    {
+        var newReview = new Review
+        {
+            EventId = eventId,
+            Title = title,
+            Rating = rating,
+            Description = description
+        };
+
+        _context.Reviews.Add(newReview);
+        _context.SaveChanges();
+
+        return RedirectToAction("Details", new { id = eventId });
+    }
+
+
+    [HttpPost]
+    public IActionResult DeleteReview(int id, int eventId)
+    {
+        var review = _context.Reviews.Find(id);
+        if (review != null)
+        {
+            _context.Reviews.Remove(review);
+            _context.SaveChanges();
+        }
+
+        return RedirectToAction("Details", new { id = eventId });
     }
 }
