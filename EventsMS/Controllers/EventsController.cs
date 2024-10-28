@@ -64,6 +64,8 @@ public class EventsController : Controller
         }
 
         _eventVM = new EventVM(_context, @event);
+
+        ReviewsDetails(@event.Id);
         return View(_eventVM);
     }
 
@@ -353,4 +355,25 @@ public class EventsController : Controller
 
         return RedirectToAction("Details", new { id = eventId });
     }
+
+
+    public IActionResult ReviewsDetails(int eventId)
+    {
+        var reviews = _context.Reviews
+            .Where(r => r.EventId == eventId)
+            .ToList();
+
+        var ratingCounts = new int[5]; // Array for ratings 1 to 5
+        foreach (var review in reviews)
+        {
+            if (review.Rating >= 1 && review.Rating <= 5)
+            {
+                ratingCounts[review.Rating - 1]++;
+            }
+        }
+
+        ViewData["RatingCounts"] = ratingCounts;
+        return View(reviews);
+    }
+
 }
